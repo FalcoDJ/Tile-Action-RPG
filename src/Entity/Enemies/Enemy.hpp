@@ -11,9 +11,15 @@ private:
 public:
     Enemy()
     {
+        m_Layer = "enemy_layer";
+
         col = olc::RED;
         m_Bounds->radius = .2;
         m_Speed = 3;
+
+        Setup();
+
+        m_HurtBox->radius = .4;
     }
     ~Enemy(){}
 

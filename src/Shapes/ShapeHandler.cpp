@@ -49,6 +49,10 @@ void ShapeHandler::Update(float fElapsedTime)
         // ------------ Handle Collisions ------------ //
         olc::vf2d vPotentialPosition = object.pos + object.vel * fElapsedTime;
 
+        // Vector to hold the rays to the nearest collision point
+		std::vector<olc::vf2d> distances;
+
+        //Work out the distances
         for (auto& r : m_s_Instance->m_Rectangles)
         {
             olc::vf2d vNearestPoint;
@@ -56,12 +60,31 @@ void ShapeHandler::Update(float fElapsedTime)
             vNearestPoint.y = std::max(float(r.pos.y), std::min(vPotentialPosition.y, float(r.pos.y + r.size.y)));
 
             olc::vf2d vRayToNearest = vNearestPoint - vPotentialPosition;
-            float fOverlap = object.radius - vRayToNearest.mag();
+            distances.push_back(vRayToNearest);
+            // float fOverlap = object.radius - vRayToNearest.mag();
+            // if (std::isnan(fOverlap)) fOverlap = 0;
+            // if (fOverlap > 0)
+            // {
+            //     // Statically resolve the collision
+            //     vPotentialPosition = vPotentialPosition - vRayToNearest.norm() * fOverlap;
+            // }
+        }
+
+        // Sort the collisions by distance
+        std::sort(distances.begin(), distances.end(), [](const olc::vf2d& a, const olc::vf2d& b)
+        {
+            return a.mag2() < b.mag2();
+        });
+
+        // resolve Collisions
+        for (auto& d : distances)
+        {
+            float fOverlap = object.radius - d.mag();
             if (std::isnan(fOverlap)) fOverlap = 0;
             if (fOverlap > 0)
             {
                 // Statically resolve the collision
-                vPotentialPosition = vPotentialPosition - vRayToNearest.norm() * fOverlap;
+                vPotentialPosition = vPotentialPosition - d.norm() * fOverlap;
             }
         }
 

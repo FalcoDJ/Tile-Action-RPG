@@ -12,7 +12,9 @@ class Circle
         olc::vf2d pos = {0,0}, vel = {0,0};
         float radius = 0.0f;
 
+
         bool operator != (const Circle& ctc) const { return (this->pos != ctc.pos || this->radius != ctc.radius || this->vel != ctc.vel); }
+        bool operator == (const Circle& ctc) const { return (this->pos == ctc.pos && this->radius == ctc.radius && this->vel == ctc.vel); }
 
 };
 
@@ -23,6 +25,9 @@ class Rectangle
         Rectangle(olc::vf2d p, olc::vf2d v, olc::vf2d s) : pos(p), vel(v), size(s) {}
         ~Rectangle(){}
         olc::vf2d pos = {0,0},vel = {0,0},size = {0,0};
+
+        bool operator != (const Rectangle& rtc) const { return (this->pos != rtc.pos || this->size != rtc.size || this->vel != rtc.vel); }
+        bool operator == (const Rectangle& rtc) const { return (this->pos == rtc.pos && this->size == rtc.size && this->vel == rtc.vel); }
 };
 
 #endif

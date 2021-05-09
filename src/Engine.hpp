@@ -14,8 +14,9 @@
 
 #include <vector>
 
-#include "Tiles/TileMap.hpp"
 #include "Shapes/ShapeHandler.hpp"
+#include "Shapes/HitBox/HitBoxHandler.hpp"
+#include "Tiles/TileMap.hpp"
 #include "Tiles/Walker.hpp"
 #include "Entity/Player/Player.hpp"
 #include "Entity/Enemies/Enemy.hpp"
@@ -26,6 +27,7 @@ class Engine : public olc::PixelGameEngine
 {
 public:
     ShapeHandler sh;
+    HitBoxHandler hbh;
     TileTransformedView tv;
 
     vf2d Canvas_Size = {480, 270};
@@ -40,48 +42,18 @@ public:
 
     std::vector<Enemy*> enemies;
     std::vector<Player*> players;
-    
-public:
-    Engine()
+
+private:
+    void CreateLevel()
     {
-        // if (Canvas_Test_Width > Canvas_Size)
-        Canvas_Scale = Canvas_Test_Width/Canvas_Size;
-        Canvas_Scale.y = Canvas_Scale.x;
-
-        std::cout << "(" << Canvas_Scale.x << ", " << Canvas_Scale.y << ")";
-        
-        sAppName = "Action RPG";
-    }
-    ~Engine()
-    {
-        players.clear();
-        enemies.clear();
-    }
-
-    bool OnUserCreate() override
-    {
-        tv = TileTransformedView({ScreenWidth(), ScreenHeight()}, {16,16});
-
-        tile_map.path_to_spritesheet = "assets/Tiles/MysticChroma_Basics.png";
-        tile_map.defaultStateForTile = enabled;
-        tile_map.tileSize = 1;
-
-        level_size = {level_width, level_height};
-
-        if (!tile_map.Setup(level_width, level_height, this))
-        {
-            return false;
-        }
-
-        if (walker.Setup(level_size/2,{0,0},level_size))
-        {
-            walker.walk(200);
+        walker.walk(200);
             for (auto const &i : walker.step_history)
             {
                 tile_map.setTileXY(i.x,i.y, disabled);
             }
 
             ShapeHandler::ClearCircles();
+            HitBoxHandler::Clear();
 
             enemies.clear();
 
@@ -119,6 +91,45 @@ public:
                     r->size = {tile_map.tileSize,tile_map.tileSize};
                 }
             }
+    }
+    
+public:
+    Engine()
+    {
+        // if (Canvas_Test_Width > Canvas_Size)
+        Canvas_Scale = Canvas_Test_Width/Canvas_Size;
+        Canvas_Scale.y = Canvas_Scale.x;
+
+        std::cout << "(" << Canvas_Scale.x << ", " << Canvas_Scale.y << ")";
+        
+        sAppName = "Action RPG";
+
+        HitBoxHandler::GetNullLayer();
+    }
+    ~Engine()
+    {
+        players.clear();
+        enemies.clear();
+    }
+
+    bool OnUserCreate() override
+    {
+        tv = TileTransformedView({ScreenWidth(), ScreenHeight()}, {16,16});
+
+        tile_map.path_to_spritesheet = "assets/Tiles/MysticChroma_Basics.png";
+        tile_map.defaultStateForTile = enabled;
+        tile_map.tileSize = 1;
+
+        level_size = {level_width, level_height};
+
+        if (!tile_map.Setup(level_width, level_height, this))
+        {
+            return false;
+        }
+
+        if (walker.Setup(level_size/2,{0,0},level_size))
+        {
+            CreateLevel();
         }
         else
         {
@@ -167,6 +178,7 @@ public:
         }
 
         ShapeHandler::Update(fElapsedTime);
+        HitBoxHandler::Update(fElapsedTime);
 
 
         // These will need to updated when multiplayer is implemented
@@ -184,51 +196,8 @@ public:
 
             if (walker.Setup(level_size/2,{0,0},level_size))
             {
-                walker.walk(200);
-                for (auto const &i : walker.step_history)
-                {
-                    tile_map.setTileXY(i.x,i.y, disabled);
-                }
-
-                ShapeHandler::ClearCircles();
-
-                enemies.clear();
-                
-                for (auto& room : walker.rooms)
-                {
-                    if (room.size > vi2d(2,2))
-                    {
-                        enemies.push_back(new Enemy);
-                        enemies[enemies.size() - 1]->Spawn(room.position + room.size/2);
-                    }
-                }
-
-                tile_map.CreateBuffer(this, &tv);
-                // object.pos = walker.step_history.front() * 24;
-
-                ShapeHandler::SetWorldBounds({0,0}, level_size);
-
-                players.clear();
-
-                players.push_back(new Player());
-
-                for (auto* player : players)
-                    player->Spawn(walker.step_history.front());
-
-                ShapeHandler::ClearRectangles();
-
-
-            for (int i = 0; i < level_width * level_height; i++)
-            {
-                if (tile_map.getTile(i).state == enabled)
-                {
-                    olc::vf2d tilePos = tile_map.index2xy(i);
-                    Rectangle* r = ShapeHandler::CreateRectangle();
-                    r->pos = tilePos;
-                    r->size = {tile_map.tileSize,tile_map.tileSize};
-                }
+                CreateLevel();
             }
-        }
         }
 
         Clear(BLANK);
@@ -239,6 +208,8 @@ public:
 
         for (auto* player : players)
         player->Draw(&tv, {0,0});
+
+        HitBoxHandler::Draw(&tv);
 
         DrawStringDecal({2,2}, "(" + std::to_string(vCurrentCell.x) + ", " + std::to_string(vCurrentCell.y) + ") FPS: " + std::to_string(GetFPS()), RED);
 
