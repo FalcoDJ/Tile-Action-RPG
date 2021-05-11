@@ -54,7 +54,6 @@ void HitBoxHandler::CreateHitBox(olc::vf2d p, float r, float m, HBType t, int la
     h.layer = layer;
 
     hv.push_back(h);
-
 }
 
 HurtBox* HitBoxHandler::CreateHurtBox(std::string layer_name)
@@ -78,7 +77,7 @@ void HitBoxHandler::Update(float fElapsedTime)
     {
         for (auto& hitbox : hitbox_vec)
         {
-            if (hurtbox.layer != hitbox.layer)
+            if (hurtbox.layer != hitbox.layer && hurtbox.layer != GetNullLayer())
             {
                 // HurtBox and hitbox are not on the same layer so continue
                 olc::vf2d vecDistance = (hurtbox.pos - hitbox.pos);

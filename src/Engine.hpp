@@ -43,54 +43,58 @@ public:
     std::vector<Enemy*> enemies;
     std::vector<Player*> players;
 
+    olc::vf2d tv_scale = {0,0};
+    
+
 private:
     void CreateLevel()
     {
-        walker.walk(200);
-            for (auto const &i : walker.step_history)
+        walker.walk(100);
+        ShapeHandler::ClearCircles();
+        ShapeHandler::ClearRectangles();
+        HitBoxHandler::Clear();
+
+        for (auto const &i : walker.step_history)
+        {
+            tile_map.setTileXY(i.x,i.y, disabled);
+        }
+
+
+        enemies.clear();
+
+        for (auto& room : walker.rooms)
+        {
+            if (room.size > vi2d(2,2))
             {
-                tile_map.setTileXY(i.x,i.y, disabled);
+                enemies.push_back(new Enemy);
+                enemies.back()->Spawn(room.position + room.size/2);
             }
+        }
 
-            ShapeHandler::ClearCircles();
-            HitBoxHandler::Clear();
+        players.clear();
 
-            enemies.clear();
+        players.push_back(new Player);
 
-            for (auto& room : walker.rooms)
+        for (auto* player : players)
+            player->Spawn(walker.step_history.front());
+        
+        tv.SetWorldScale(tv_scale);
+
+        tile_map.CreateBuffer(this, &tv);
+        // object.pos = walker.step_history.front() * 24;
+
+        ShapeHandler::SetWorldBounds({0,0}, level_size);
+
+        for (int i = 0; i < level_width * level_height; i++)
+        {
+            if (tile_map.getTile(i).state == enabled)
             {
-                if (room.size > vi2d(2,2))
-                {
-                    enemies.push_back(new Enemy);
-                    enemies[enemies.size() - 1]->Spawn(room.position + room.size/2);
-                }
+                olc::vf2d tilePos = tile_map.index2xy(i);
+                Rectangle* r = ShapeHandler::CreateRectangle();
+                r->pos = tilePos;
+                r->size = {tile_map.tileSize,tile_map.tileSize};
             }
-
-            tile_map.CreateBuffer(this, &tv);
-            // object.pos = walker.step_history.front() * 24;
-
-            ShapeHandler::SetWorldBounds({0,0}, level_size);
-
-            players.clear();
-
-            players.push_back(new Player());
-
-            for (auto* player : players)
-                player->Spawn(walker.step_history.front());
-
-            ShapeHandler::ClearRectangles();
-
-
-            for (int i = 0; i < level_width * level_height; i++)
-            {
-                if (tile_map.getTile(i).state == enabled)
-                {
-                    olc::vf2d tilePos = tile_map.index2xy(i);
-                    Rectangle* r = ShapeHandler::CreateRectangle();
-                    r->pos = tilePos;
-                    r->size = {tile_map.tileSize,tile_map.tileSize};
-                }
-            }
+        }
     }
     
 public:
@@ -115,6 +119,7 @@ public:
     bool OnUserCreate() override
     {
         tv = TileTransformedView({ScreenWidth(), ScreenHeight()}, {16,16});
+        tv_scale = tv.GetWorldScale();
 
         tile_map.path_to_spritesheet = "assets/Tiles/MysticChroma_Basics.png";
         tile_map.defaultStateForTile = enabled;
@@ -142,18 +147,12 @@ public:
     bool OnUserUpdate(float fElapsedTime) override
     {
 
-        // Handle Pan & Zoom
-		if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
-		if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
-		if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
-		if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
-		if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
-
-        for (auto* player : players)
-        {
-            player->handleInput(this);
-            player->Update(fElapsedTime);
-        }
+        // // Handle Pan & Zoom
+		// if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
+		// if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
+		// if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
+		// if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
+		// if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
 
         for (auto* enemy : enemies)
         {
@@ -177,9 +176,11 @@ public:
             PlayerToBeChased = nullptr;
         }
 
-        ShapeHandler::Update(fElapsedTime);
-        HitBoxHandler::Update(fElapsedTime);
-
+        for (auto* player : players)
+        {
+            player->handleInput(this);
+            player->Update(fElapsedTime);
+        }
 
         // These will need to updated when multiplayer is implemented
         tv.SetWorldOffset(players[0]->GetBounds().pos - tv.ScaleToWorld(olc::vf2d(ScreenWidth()/2.0f, ScreenHeight()/2.0f)));
@@ -199,9 +200,12 @@ public:
                 CreateLevel();
             }
         }
+        
+        HitBoxHandler::Update(fElapsedTime);
+        ShapeHandler::Update(fElapsedTime);
 
         Clear(BLANK);
-        tile_map.DrawByTiles(&tv, {0,0});
+        tile_map.DrawByBuffer(&tv, {0,0});
         
         for (auto* enemy : enemies)
         enemy->Draw(&tv, {0,0});

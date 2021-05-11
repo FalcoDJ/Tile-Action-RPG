@@ -4,7 +4,7 @@ source /etc/profile.d/emscripten.sh
 
 cd bin/
 
-em++ -std=c++17 -O2 -s ALLOW_MEMORY_GROWTH=1 -s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s USE_LIBPNG=1 ../src/*.cpp ../src/Shapes/*.cpp -o index.html --preload-file ../assets/
+em++ -std=c++17 -O2 -s ALLOW_MEMORY_GROWTH=1 -s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s USE_LIBPNG=1 ../src/*.cpp ../src/Shapes/*.cpp ../src/Shapes/HitBox/*.cpp -o index.html --preload-file ../assets/
 
 rm -Rf test_web.sh
 

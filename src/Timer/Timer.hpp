@@ -9,12 +9,15 @@ private:
     float m_Duration = 0.0f;
     float m_TimeLeft = 0.0f;
     bool m_Running = false;
+    bool m_WasIRunningLastFrame = false;
+
 public:
     Timer() : olc::PGEX(true) {}
 
     void Restart()
     {
         m_TimeLeft = m_Duration;
+        m_Running = true;
     }
     void Start(float Duration)
     {
@@ -28,16 +31,29 @@ public:
         return m_TimeLeft;
     }
 
+    bool Running()
+    {
+        return m_Running;
+    }
+
     void OnBeforeUserUpdate(float &fElapsedTime) override
     {
+        m_WasIRunningLastFrame = m_Running;
+        
         if (m_Running)
         {
             m_TimeLeft -= fElapsedTime;
             if (m_TimeLeft <= 0.0f)
             {
                 m_Running = false;
+                m_TimeLeft = 0.0f;
             }
         }
+    }
+
+    bool JustFinished()
+    {
+        return (m_WasIRunningLastFrame && !m_Running); // If I just finished return true;
     }
 };
 

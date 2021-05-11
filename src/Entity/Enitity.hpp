@@ -8,6 +8,10 @@
 #include "../Shapes/HitBox/HitBoxHandler.hpp"
 #include "../Timer/Timer.hpp"
 
+enum class EntityState {
+    NORMAL=0,
+    INVINCIBLE=1
+};
 
 class Entity
 {
@@ -26,25 +30,47 @@ protected:
 
     Circle* m_Bounds = nullptr;
     HurtBox* m_HurtBox = nullptr;
-    olc::vf2d movement_vector;
-    float m_Speed;
-    std::string m_Layer;
+    EntityState m_State = EntityState::NORMAL;
+    float m_Health = 100;
+    float m_MaxHealth = 100;
 
+    std::string m_Layer;
     olc::Pixel col = olc::GREEN;
+
+    float m_Speed;
+    olc::vf2d movement_vector;
 
 protected:
     Timer m_AttackTimer;
+    Timer m_DeathPhaseTimer;
+    Timer m_InvincibilityTimer;
+
+    bool m_AmIAlive = true;
+    bool m_DiedYet = false;
+    float m_DeathPhaseDuration = 0.0f;
+    float m_InvincibilityDuration = 0.0f;
 
     virtual void GetHurt()
     {
-        
+        m_State = EntityState::INVINCIBLE;
+        m_InvincibilityTimer.Start(m_InvincibilityDuration);
+        m_Health -= m_HurtBox->magnitude;
     }
     virtual void Attack()
     {
 
     }
+    virtual void Die()
+    {
+        m_Bounds->vel = {0,0};
+        m_HurtBox->layer = HitBoxHandler::GetNullLayer();
+        m_State = EntityState::NORMAL;
+        m_AmIAlive = false;
+    }
 
 public:
+    bool AmIAlive() { return m_AmIAlive; }
+
     void Spawn(olc::vf2d starting_point)
     {
         m_Bounds->pos = starting_point;
@@ -63,20 +89,30 @@ public:
         if (m_AttackTimer.GetTimeLeft() > 0.0f)
             Attack();
 
-        if (m_HurtBox->magnitude > 0)
+        if (m_State != EntityState::INVINCIBLE)
         {
-            switch (m_HurtBox->type)
-            {
-                case HBType::damage:
-                    m_Bounds->vel = (movement_vector * -1).norm() * m_HurtBox->magnitude;
-                    break;
-                
-                default:
-                    break;
-            }
 
-            m_HurtBox->magnitude = 0.0f;
-            m_HurtBox->type = HBType::null;
+            if (m_HurtBox->type != HBType::null)
+            {
+                GetHurt();
+                m_HurtBox->type = HBType::null;
+                m_HurtBox->magnitude = 0.0f;
+            }   
+        }
+        else
+        {
+            if (m_InvincibilityTimer.JustFinished()) { m_State = EntityState::NORMAL; }
+        }
+
+        if (m_Health <= 0.0f && !m_DiedYet)
+        {
+            m_DiedYet = true;
+            m_DeathPhaseTimer.Start(m_DeathPhaseDuration);
+        }
+
+        if (m_DeathPhaseTimer.JustFinished())
+        {
+            Die();
         }
     }
 

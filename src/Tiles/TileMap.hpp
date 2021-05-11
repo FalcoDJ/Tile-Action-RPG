@@ -4,6 +4,7 @@
 #include <vector>
 #include "../FileChecker.hpp"
 #include "../olcPGEX_TransformedView.h"
+#include "../Shapes/Shapes.hpp"
 
 enum class tilebitmap {
     TLeft, TMiddle, TRight,
@@ -23,6 +24,8 @@ public:
     Tile(tileBool e) : state(e) {}
     ~Tile(){}
     tileBool state;
+    int edge_id[4] = {0,0,0,0};
+    bool edge_exists[4] = {false,false,false,false};
 };
 
 class TileMap
@@ -45,6 +48,11 @@ public:
 public:
     TileMap(){}
     ~TileMap(){}
+
+    std::vector<Tile>& GetTileVector()
+    {
+        return m_TileVector;
+    }
 
     bool Setup(int width, int height, olc::PixelGameEngine* enginePointer)
     {
@@ -81,6 +89,7 @@ public:
         // pge->SetPixelMode(olc::Pixel::ALPHA);
         pge->Clear(olc::BLANK);
         
+        // tv->SetWorldScale({1,1});
         tv->SetWorldOffset({0,0});
         
         DrawByTiles(tv, {0,0});

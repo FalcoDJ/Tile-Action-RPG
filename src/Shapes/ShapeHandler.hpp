@@ -19,14 +19,16 @@ public:
     ShapeHandler();
     ~ShapeHandler();
     static Circle* CreateCircle();
+    static void RemoveCircle(Circle* c);
+    
     static Rectangle* CreateRectangle();
+    static void RemoveRectangle(Rectangle* r);
 
     static void SetWorldBounds(olc::vf2d tl, olc::vf2d br);
 
     static void Update(float fElapsedTime);
     static void ClearCircles();
     static void ClearRectangles();
-    
 };
 
 #endif

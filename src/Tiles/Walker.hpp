@@ -134,8 +134,8 @@ public:
         rooms.clear();
 
         m_Position = start_pos;
-        step_history.clear();
-        step_history.push_back(m_Position);
+        step_history.push_back(start_pos);
+
         m_Top_Left_Border = top_left;
         m_Bottom_Right_Border = bottom_right;
 
