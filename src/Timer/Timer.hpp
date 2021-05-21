@@ -57,4 +57,51 @@ public:
     }
 };
 
+class StopWatch : public olc::PGEX
+{
+private:
+    float m_ElapsedTime = 0.0f;
+    bool m_Running = false;
+    bool m_WasIRunningLastFrame = false;
+
+public:
+    StopWatch() : olc::PGEX(true) {}
+
+    void Start()
+    {
+        m_ElapsedTime = 0.0f;
+        m_Running = true;
+    }
+
+    void Stop()
+    {
+        m_Running = false;
+    }
+
+    float GetElapsedTime()
+    {
+        return m_ElapsedTime;
+    }
+
+    bool Running()
+    {
+        return m_Running;
+    }
+
+    void OnBeforeUserUpdate(float &fElapsedTime) override
+    {
+        m_WasIRunningLastFrame = m_Running;
+
+        if (m_Running)
+        {
+            m_ElapsedTime += fElapsedTime;
+        }
+    }
+    
+    bool JustFinished()
+    {
+        return (m_WasIRunningLastFrame && !m_Running); // If I just finished return true;
+    }
+};
+
 #endif

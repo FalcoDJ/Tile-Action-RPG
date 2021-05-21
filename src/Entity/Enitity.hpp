@@ -80,6 +80,16 @@ public:
     {
         return Circle(m_Bounds->pos,m_Bounds->vel,m_Bounds->radius);
     }
+
+    float GetHealth()
+    {
+        return m_Health;
+    }
+
+    float GetHealthPercentage()
+    {
+        return  m_Health/m_MaxHealth;
+    }
     
     virtual void Update(float fElapsedTime)
     {

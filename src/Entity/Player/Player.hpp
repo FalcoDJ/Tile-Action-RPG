@@ -9,7 +9,15 @@ private:
     olc::Key Left = olc::Key::A, Right = olc::Key::D, Up = olc::Key::W, Down = olc::Key::S, Run = olc::Key::SHIFT, Attack_Key = olc::Key::SPACE;
     
     float m_DurationOfAttack = 0.3f;
-    olc::vf2d attack_normal = {0,0};
+    olc::vf2d m_AttackNormal = {0,0};
+    float m_HitboxRadius = 1.5f;
+    
+    float m_ChargeDuration = 0.75f;
+    StopWatch m_ButtonClock;
+
+    float m_DefaultSpeed = 1.0;
+    float m_RunSpeed = 1.5;
+    float m_ChargeSpeed = 0.5;
 
 public:
     Player()
@@ -42,7 +50,7 @@ public:
 
     void Attack() override
     {
-        HitBoxHandler::CreateHitBox(m_Bounds->pos + attack_normal * 1.4, 1.5, 10, HBType::damage, m_HurtBox->layer);
+        HitBoxHandler::CreateHitBox(m_Bounds->pos + m_AttackNormal * 1.4, m_HitboxRadius, 10, HBType::damage, m_HurtBox->layer);
     }
 
     void handleInput(olc::PixelGameEngine* pge)
@@ -56,12 +64,40 @@ public:
             movement_vector = olc::vf2d(x_value,y_value);
 
             if (movement_vector.mag2() > 0)
-            movement_vector = movement_vector.norm() * (pge->GetKey(Run).bHeld ? 1.5 : 1);
-
-            if (pge->GetMouse(0).bPressed)
             {
-                attack_normal = movement_vector;
-                m_AttackTimer.Start(m_DurationOfAttack);
+                movement_vector = movement_vector.norm() * (pge->GetKey(Run).bHeld ? m_RunSpeed : m_DefaultSpeed);
+
+                if (!m_AttackTimer.Running())
+                    m_AttackNormal = movement_vector.norm();
+            }
+
+            if (!m_AttackTimer.Running())
+            {
+                if (!m_ButtonClock.Running() && (pge->GetMouse(0).bHeld || pge->GetKey(Attack_Key).bHeld))
+                {
+                    m_ButtonClock.Start();
+                }
+                if (pge->GetMouse(0).bReleased || pge->GetKey(Attack_Key).bReleased)
+                {
+                    m_ButtonClock.Stop();
+                }
+
+                // Decide how to attack based on duration of button press
+
+                if (m_ButtonClock.GetElapsedTime() <= 0.15f && m_ButtonClock.JustFinished())
+                {
+                    m_HitboxRadius = 1.5f;
+                    m_AttackTimer.Start(m_DurationOfAttack);
+                }
+
+                if (m_ButtonClock.GetElapsedTime() >= m_ChargeDuration && m_ButtonClock.Running())
+                {
+                    m_ButtonClock.Stop();
+                    m_HitboxRadius = 2.3f;
+                    m_AttackNormal = olc::vf2d::ZERO();
+                    m_AttackTimer.Start(m_DurationOfAttack);
+                }
+
             }
         }
 

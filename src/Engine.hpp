@@ -215,7 +215,10 @@ public:
 
         HitBoxHandler::Draw(&tv);
 
-        DrawStringDecal({2,2}, "(" + std::to_string(vCurrentCell.x) + ", " + std::to_string(vCurrentCell.y) + ") FPS: " + std::to_string(GetFPS()), RED);
+        FillRectDecal({7,3}, {82,10}, BLACK);
+        FillRectDecal({8,4}, {players[0]->GetHealthPercentage() * 80, 8}, GREEN);
+
+        DrawStringDecal({96,4}, "(" + std::to_string(vCurrentCell.x) + ", " + std::to_string(vCurrentCell.y) + ") FPS: " + std::to_string(GetFPS()), RED);
 
         return true;
     }
