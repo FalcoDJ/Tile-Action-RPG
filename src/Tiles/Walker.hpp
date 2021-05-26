@@ -98,7 +98,7 @@ private:
     {
         olc::vf2d size = {float(rand() % 2 + (rand() % 2 + 4)), float(rand() % 2 + 4)};
         olc::vf2d top_left_corner = (m_Position - size/2).ceil();
-        step_history.push_back(top_left_corner);
+        // step_history.push_back(top_left_corner);
         rooms.push_back(create_room(position, size));
         for (int y = 0; y < size.y; y++)
             for (int x = 0; x < size.x; x++)

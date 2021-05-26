@@ -84,13 +84,13 @@ public:
 
                 // Decide how to attack based on duration of button press
 
-                if (m_ButtonClock.GetElapsedTime() <= 0.15f && m_ButtonClock.JustFinished())
+                if (m_ButtonClock.GetElapsedTime() <= 0.2f && m_ButtonClock.JustFinished())
                 {
                     m_HitboxRadius = 1.5f;
                     m_AttackTimer.Start(m_DurationOfAttack);
                 }
 
-                if (m_ButtonClock.GetElapsedTime() >= m_ChargeDuration && m_ButtonClock.Running())
+                if (m_ButtonClock.GetElapsedTime() >= m_ChargeDuration && m_ButtonClock.JustFinished())
                 {
                     m_ButtonClock.Stop();
                     m_HitboxRadius = 2.3f;
@@ -104,6 +104,11 @@ public:
         col = olc::GREEN;
         if (m_State == EntityState::INVINCIBLE)
             col = olc::YELLOW;
+
+        if (m_ButtonClock.Running() && m_ButtonClock.GetElapsedTime() >= m_ChargeDuration)
+        {
+            col = olc::CYAN;
+        }
     }
 };
 

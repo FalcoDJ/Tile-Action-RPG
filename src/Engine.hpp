@@ -172,7 +172,7 @@ public:
                 }
             }
 
-            enemy->chase_player(PlayerToBeChased->GetBounds().pos);
+            enemy->SetPlayerPos(PlayerToBeChased->GetBounds().pos);
             PlayerToBeChased = nullptr;
         }
 

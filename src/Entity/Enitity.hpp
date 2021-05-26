@@ -91,8 +91,12 @@ public:
         return  m_Health/m_MaxHealth;
     }
     
+    virtual void BeforeUpdate() {}
+
     virtual void Update(float fElapsedTime)
     {
+        BeforeUpdate();
+
         m_Bounds->vel = movement_vector * m_Speed;
         m_HurtBox->pos = m_Bounds->pos;
 
@@ -124,7 +128,11 @@ public:
         {
             Die();
         }
+
+        AfterUpdate();
     }
+
+    virtual void AfterUpdate() {}
 
     virtual void Draw(olc::TileTransformedView* tv, olc::vf2d Camera)
     {

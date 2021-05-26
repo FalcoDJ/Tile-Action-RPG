@@ -64,6 +64,16 @@ private:
     bool m_Running = false;
     bool m_WasIRunningLastFrame = false;
 
+    void OnBeforeUserUpdate(float &fElapsedTime) override
+    {
+        m_WasIRunningLastFrame = m_Running;
+
+        if (m_Running)
+        {
+            m_ElapsedTime += fElapsedTime;
+        }
+    }
+
 public:
     StopWatch() : olc::PGEX(true) {}
 
@@ -86,16 +96,6 @@ public:
     bool Running()
     {
         return m_Running;
-    }
-
-    void OnBeforeUserUpdate(float &fElapsedTime) override
-    {
-        m_WasIRunningLastFrame = m_Running;
-
-        if (m_Running)
-        {
-            m_ElapsedTime += fElapsedTime;
-        }
     }
     
     bool JustFinished()
