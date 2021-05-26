@@ -57,7 +57,7 @@ void ShapeHandler::Update(float fElapsedTime)
                 olc::vf2d vecDistance = (object.pos - circle.pos);
                 float distance = vecDistance.mag2();
                 float sumOfRadii = (object.radius + circle.radius);
-                if (distance < sumOfRadii * sumOfRadii)
+                if (distance <= sumOfRadii * sumOfRadii)
                 {
                     distance = sqrt(distance);
                     olc::vf2d collision_normal = vecDistance.norm();
@@ -80,7 +80,7 @@ void ShapeHandler::Update(float fElapsedTime)
             olc::vf2d vRayToNearest = vNearestPoint - vPotentialPosition;
             float fOverlap = object.radius - vRayToNearest.mag();
             if (std::isnan(fOverlap)) fOverlap = 0;
-            if (fOverlap > 0)
+            if (fOverlap >= 0)
             {
                 // Statically resolve the collision
                 vPotentialPosition = vPotentialPosition - vRayToNearest.norm() * fOverlap;

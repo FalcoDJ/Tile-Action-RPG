@@ -64,10 +64,10 @@ private:
 
         for (auto& room : walker.rooms)
         {
-            if (room.size > vi2d(2,2))
+            if (room.size.mag2() > 2 * 2)
             {
                 enemies.push_back(new Enemy);
-                enemies.back()->Spawn(room.position + room.size/2);
+                enemies.back()->Spawn(room.position + vf2d{ rand() % 1 - 0.5f, rand() % 1 - 0.5f});
             }
         }
 
@@ -81,7 +81,6 @@ private:
         tv.SetWorldScale(tv_scale);
 
         tile_map.CreateBuffer(this, &tv);
-        // object.pos = walker.step_history.front() * 24;
 
         ShapeHandler::SetWorldBounds({0,0}, level_size);
 
@@ -154,9 +153,10 @@ public:
 		// if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
 		// if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
 
+        int number_of_dead_enemies = 0;
+
         for (auto* enemy : enemies)
         {
-            enemy->Update(fElapsedTime);
 
             Player* PlayerToBeChased = players[0];
             
@@ -174,6 +174,10 @@ public:
 
             enemy->SetPlayerPos(PlayerToBeChased->GetBounds().pos);
             PlayerToBeChased = nullptr;
+
+            enemy->Update(fElapsedTime);
+
+            if (!enemy->AmIAlive()) number_of_dead_enemies++;
         }
 
         for (auto* player : players)
@@ -203,6 +207,8 @@ public:
         
         HitBoxHandler::Update(fElapsedTime);
         ShapeHandler::Update(fElapsedTime);
+
+        if (number_of_dead_enemies >= enemies.size()) { CreateLevel(); }
 
         Clear(BLANK);
         tile_map.DrawByBuffer(&tv, {0,0});

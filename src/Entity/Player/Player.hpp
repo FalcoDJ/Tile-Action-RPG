@@ -59,8 +59,12 @@ public:
         
         if (m_AmIAlive)
         {
+            if (!m_AttackTimer.Running())
+                m_AttackNormal = olc::vf2d::ZERO();
+
             int x_value = (int)pge->GetKey(Right).bHeld - (int)pge->GetKey(Left).bHeld;
             int y_value = (int)pge->GetKey(Down).bHeld - (int)pge->GetKey(Up).bHeld;
+            
             movement_vector = olc::vf2d(x_value,y_value);
 
             if (movement_vector.mag2() > 0)
@@ -92,7 +96,6 @@ public:
 
                 if (m_ButtonClock.GetElapsedTime() >= m_ChargeDuration && m_ButtonClock.JustFinished())
                 {
-                    m_ButtonClock.Stop();
                     m_HitboxRadius = 2.3f;
                     m_AttackNormal = olc::vf2d::ZERO();
                     m_AttackTimer.Start(m_DurationOfAttack);

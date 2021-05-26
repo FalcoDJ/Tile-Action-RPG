@@ -62,6 +62,7 @@ protected:
     }
     virtual void Die()
     {
+        m_Health = 0.0f;
         m_Bounds->vel = {0,0};
         m_HurtBox->layer = HitBoxHandler::GetNullLayer();
         m_State = EntityState::NORMAL;
