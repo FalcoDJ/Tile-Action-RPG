@@ -106,7 +106,6 @@ public:
 
         if (m_State != EntityState::INVINCIBLE)
         {
-
             if (m_HurtBox->type != HBType::null)
             {
                 GetHurt();
@@ -135,9 +134,9 @@ public:
 
     virtual void AfterUpdate() {}
 
-    virtual void Draw(olc::TileTransformedView* tv, olc::vf2d Camera)
+    virtual void Draw(olc::TileTransformedView* tv)
     {
-        tv->FillCircle(m_Bounds->pos - Camera, m_Bounds->radius, col);
+        tv->FillCircle(m_Bounds->pos, m_Bounds->radius, col);
     }
 };
 

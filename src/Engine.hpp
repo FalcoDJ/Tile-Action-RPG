@@ -11,6 +11,7 @@
 
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_TransformedView.h"
+#include "LayerController/LayerController.hpp"
 
 #include <vector>
 
@@ -44,21 +45,23 @@ public:
     std::vector<Player*> players;
 
     olc::vf2d tv_scale = {0,0};
+    int walker_step_count = 100;
     
 
 private:
     void CreateLevel()
     {
-        walker.walk(100);
+        walker.walk(walker_step_count);
         ShapeHandler::ClearCircles();
         ShapeHandler::ClearRectangles();
         HitBoxHandler::Clear();
+
+        tile_map.Setup(level_size.x, level_size.y);
 
         for (auto const &i : walker.step_history)
         {
             tile_map.setTileXY(i.x,i.y, disabled);
         }
-
 
         enemies.clear();
 
@@ -115,18 +118,47 @@ public:
         enemies.clear();
     }
 
+    Decal* tempDecal = nullptr;
+
+    int TilesLayer = 0;
+    int EntityLayer = 0;
+    int UILayer = 0;
+
     bool OnUserCreate() override
     {
+        UILayer = CreateLayer();
+        EnableLayer(UILayer, true);
+        SetDrawTarget(UILayer);
+        SetPixelMode(olc::Pixel::ALPHA);
+        Clear(olc::BLANK);
+
+        EntityLayer = CreateLayer();
+        EnableLayer(EntityLayer, true);
+        SetDrawTarget(EntityLayer);
+        SetPixelMode(olc::Pixel::ALPHA);
+        Clear(olc::BLANK);
+
+        TilesLayer = CreateLayer();
+        EnableLayer(TilesLayer, true);
+        SetDrawTarget(TilesLayer);
+        SetPixelMode(olc::Pixel::ALPHA);
+        Clear(olc::BLANK);
+
+        SetDrawTarget(nullptr);
+        Clear(olc::BLANK);
+
         tv = TileTransformedView({ScreenWidth(), ScreenHeight()}, {16,16});
         tv_scale = tv.GetWorldScale();
 
-        tile_map.path_to_spritesheet = "assets/Tiles/MysticChroma_Basics.png";
+        tempDecal = new Decal(new Sprite("assets/Tiles/Tiles.png"));
+
+        tile_map.path_to_spritesheet = "assets/Tiles/Tiles.png";
         tile_map.defaultStateForTile = enabled;
         tile_map.tileSize = 1;
 
         level_size = {level_width, level_height};
 
-        if (!tile_map.Setup(level_width, level_height, this))
+        if (!tile_map.Setup(level_width, level_height))
         {
             return false;
         }
@@ -143,15 +175,18 @@ public:
         return true;
     }
 
+    bool pan = false;
+
     bool OnUserUpdate(float fElapsedTime) override
     {
 
-        // // Handle Pan & Zoom
-		// if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
-		// if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
-		// if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
-		// if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
-		// if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
+        // Handle Pan & Zoom
+		if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
+		if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
+		if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
+		if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
+		if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
+        if (GetKey(Key::P).bPressed) pan = !pan;
 
         int number_of_dead_enemies = 0;
 
@@ -187,6 +222,7 @@ public:
         }
 
         // These will need to updated when multiplayer is implemented
+        if (!pan)
         tv.SetWorldOffset(players[0]->GetBounds().pos - tv.ScaleToWorld(olc::vf2d(ScreenWidth()/2.0f, ScreenHeight()/2.0f)));
 		olc::vi2d vCurrentCell = players[0]->GetBounds().pos.floor()/24;
         // 
@@ -194,11 +230,8 @@ public:
 
         if (GetKey(olc::ENTER).bPressed)
         {
-            for (int i = 0; i < level_width * level_height; i++)
-            {
-                tile_map.setTileIndex(i, enabled);
-            }
-
+            walker_step_count += 25;
+            level_size += { 5, 5 };
             if (walker.Setup(level_size/2,{0,0},level_size))
             {
                 CreateLevel();
@@ -208,22 +241,36 @@ public:
         HitBoxHandler::Update(fElapsedTime);
         ShapeHandler::Update(fElapsedTime);
 
-        if (number_of_dead_enemies >= enemies.size()) { CreateLevel(); }
+        if (number_of_dead_enemies >= enemies.size()) 
+        { 
+            if (walker.Setup(level_size/2,{0,0},level_size))
+            {
+                CreateLevel();
+            } 
+        }
 
+        // Drawing Stuff Starts Here
+
+        SetDrawTarget(TilesLayer);
         Clear(BLANK);
-        tile_map.DrawByBuffer(&tv, {0,0});
+        tile_map.DrawByBuffer(&tv);
         
+        SetDrawTarget(EntityLayer);
+        Clear(BLANK);
         for (auto* enemy : enemies)
-        enemy->Draw(&tv, {0,0});
+        enemy->Draw(&tv);
 
         for (auto* player : players)
-        player->Draw(&tv, {0,0});
+        player->Draw(&tv);
+
+
+        SetDrawTarget(UILayer);
+        Clear(BLANK);
 
         HitBoxHandler::Draw(&tv);
 
         FillRectDecal({7,3}, {82,10}, BLACK);
         FillRectDecal({8,4}, {players[0]->GetHealthPercentage() * 80, 8}, GREEN);
-
         DrawStringDecal({96,4}, "(" + std::to_string(vCurrentCell.x) + ", " + std::to_string(vCurrentCell.y) + ") FPS: " + std::to_string(GetFPS()), RED);
 
         return true;

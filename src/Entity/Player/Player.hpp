@@ -55,32 +55,43 @@ public:
 
     void handleInput(olc::PixelGameEngine* pge)
     {
-        movement_vector = movement_vector.lerp(olc::vf2d::ZERO(), 2.0f);
+        movement_vector = olc::vf2d::ZERO();
         
         if (m_AmIAlive)
         {
+            // Reset Attack Normal
             if (!m_AttackTimer.Running())
                 m_AttackNormal = olc::vf2d::ZERO();
 
+            // Get Direction of movement
             int x_value = (int)pge->GetKey(Right).bHeld - (int)pge->GetKey(Left).bHeld;
             int y_value = (int)pge->GetKey(Down).bHeld - (int)pge->GetKey(Up).bHeld;
             
+            // Set Direction of movement
             movement_vector = olc::vf2d(x_value,y_value);
 
+            // Are we moving?
             if (movement_vector.mag2() > 0)
             {
+                // We are so...
+
                 movement_vector = movement_vector.norm() * (pge->GetKey(Run).bHeld ? m_RunSpeed : m_DefaultSpeed);
 
+                // Set attack normal if not attacking
                 if (!m_AttackTimer.Running())
                     m_AttackNormal = movement_vector.norm();
             }
 
+            // Handle Attacking
             if (!m_AttackTimer.Running())
             {
+                // Start m_ButtonClock when button pressed
                 if (!m_ButtonClock.Running() && (pge->GetMouse(0).bHeld || pge->GetKey(Attack_Key).bHeld))
                 {
                     m_ButtonClock.Start();
                 }
+
+                // Stop m_ButtonClock when button released
                 if (pge->GetMouse(0).bReleased || pge->GetKey(Attack_Key).bReleased)
                 {
                     m_ButtonClock.Stop();
@@ -88,15 +99,17 @@ public:
 
                 // Decide how to attack based on duration of button press
 
-                if (m_ButtonClock.GetElapsedTime() <= 0.2f && m_ButtonClock.JustFinished())
+                // Light Attack
+                if (m_ButtonClock.GetElapsedTime() <= m_ChargeDuration && m_ButtonClock.JustFinished())
                 {
-                    m_HitboxRadius = 1.5f;
+                    m_HitboxRadius = 1.75f;
                     m_AttackTimer.Start(m_DurationOfAttack);
                 }
 
+                // Charge Attack
                 if (m_ButtonClock.GetElapsedTime() >= m_ChargeDuration && m_ButtonClock.JustFinished())
                 {
-                    m_HitboxRadius = 2.3f;
+                    m_HitboxRadius = 2.5f;
                     m_AttackNormal = olc::vf2d::ZERO();
                     m_AttackTimer.Start(m_DurationOfAttack);
                 }
@@ -104,10 +117,12 @@ public:
             }
         }
 
+        // Turn color based on state(s)
         col = olc::GREEN;
         if (m_State == EntityState::INVINCIBLE)
             col = olc::YELLOW;
 
+        // Turn blue if charged
         if (m_ButtonClock.Running() && m_ButtonClock.GetElapsedTime() >= m_ChargeDuration)
         {
             col = olc::CYAN;
