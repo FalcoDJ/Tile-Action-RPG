@@ -10,7 +10,8 @@
 class HitBoxHandler
 {
     private:
-        std::vector<HitBox> m_HitBoxes;
+        std::vector<HitBox>  m_HitBoxes;
+        std::list<HitBox>    m_LongTermHitboxes;
         std::vector<HurtBox> m_HurtBoxes;
         std::map<std::string, int> m_Layers;
         std::string m_NullLayer = "null_layer_0"; // Used for "invisible" hurtboxes
@@ -24,7 +25,10 @@ class HitBoxHandler
         static int GetLayer(std::string layer_name);
         static int GetNullLayer();
 
-        static void CreateHitBox(olc::vf2d p, float r, float m, HBType t, int layer);
+        static void   CreateHitBox(olc::vf2d p, float r, float m, HBType t, int layer);
+        static HitBox* CreateLongTermHitBox(olc::vf2d p, float r, float m, HBType t, int layer);
+        static void   DeleteLongTermHitBox(int& hitbox_id);
+        
         static HurtBox* CreateHurtBox(std::string layer_name);
 
         static void Clear();

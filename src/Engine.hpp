@@ -11,7 +11,7 @@
 
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_TransformedView.h"
-#include "LayerController/LayerController.hpp"
+#include "olcPGEX_LayerController.h"
 
 #include <vector>
 
@@ -19,6 +19,7 @@
 #include "Shapes/HitBox/HitBoxHandler.hpp"
 #include "Tiles/TileMap.hpp"
 #include "Tiles/Walker.hpp"
+#include "Items/HealthPickup.hpp"
 #include "Entity/Player/Player.hpp"
 #include "Entity/Enemies/Enemy.hpp"
 
@@ -40,6 +41,8 @@ public:
     int level_width = 50;
     int level_height = 50;
     olc::vi2d level_size;
+
+    HealthPickup hhhhh;
 
     std::vector<Enemy*> enemies;
     std::vector<Player*> players;
@@ -63,6 +66,18 @@ private:
             tile_map.setTileXY(i.x,i.y, disabled);
         }
 
+        players.clear();
+
+        players.push_back(new Player);
+
+        for (auto* player : players)
+        {
+            player->Spawn(walker.rooms.front().position);
+            walker.rooms.pop_front();
+        }
+
+        hhhhh.Spawn(walker.get_end_room().position);
+
         enemies.clear();
 
         for (auto& room : walker.rooms)
@@ -73,15 +88,10 @@ private:
                 enemies.back()->Spawn(room.position + vf2d{ rand() % 1 - 0.5f, rand() % 1 - 0.5f});
             }
         }
-
-        players.clear();
-
-        players.push_back(new Player);
-
-        for (auto* player : players)
-            player->Spawn(walker.step_history.front());
         
         tv.SetWorldScale(tv_scale);
+        tv.SetRangeX(true, 0, level_size.x);
+        tv.SetRangeY(true, 0, level_size.y);
 
         tile_map.CreateBuffer(this, &tv);
 
@@ -124,28 +134,15 @@ public:
     int EntityLayer = 0;
     int UILayer = 0;
 
+    std::string ui_layer = "1";
+    std::string entity_layer = "2";
+    std::string tiles_layer = "3";
+
     bool OnUserCreate() override
-    {
-        UILayer = CreateLayer();
-        EnableLayer(UILayer, true);
-        SetDrawTarget(UILayer);
-        SetPixelMode(olc::Pixel::ALPHA);
-        Clear(olc::BLANK);
-
-        EntityLayer = CreateLayer();
-        EnableLayer(EntityLayer, true);
-        SetDrawTarget(EntityLayer);
-        SetPixelMode(olc::Pixel::ALPHA);
-        Clear(olc::BLANK);
-
-        TilesLayer = CreateLayer();
-        EnableLayer(TilesLayer, true);
-        SetDrawTarget(TilesLayer);
-        SetPixelMode(olc::Pixel::ALPHA);
-        Clear(olc::BLANK);
-
-        SetDrawTarget(nullptr);
-        Clear(olc::BLANK);
+    {   
+        LayerController::CreateLayer(ui_layer);
+        LayerController::CreateLayer(entity_layer);
+        LayerController::CreateLayer(tiles_layer);
 
         tv = TileTransformedView({ScreenWidth(), ScreenHeight()}, {16,16});
         tv_scale = tv.GetWorldScale();
@@ -221,9 +218,10 @@ public:
             player->Update(fElapsedTime);
         }
 
-        // These will need to updated when multiplayer is implemented
+        // These will need to updated when/if multiplayer is implemented
         if (!pan)
-        tv.SetWorldOffset(players[0]->GetBounds().pos - tv.ScaleToWorld(olc::vf2d(ScreenWidth()/2.0f, ScreenHeight()/2.0f)));
+            tv.SetWorldOffset(players[0]->GetBounds().pos - tv.ScaleToWorld(olc::vf2d(ScreenWidth()/2.0f, ScreenHeight()/2.0f)));
+        
 		olc::vi2d vCurrentCell = players[0]->GetBounds().pos.floor()/24;
         // 
 
@@ -251,20 +249,22 @@ public:
 
         // Drawing Stuff Starts Here
 
-        SetDrawTarget(TilesLayer);
+        LayerController::SetActiveLayer(tiles_layer);
         Clear(BLANK);
         tile_map.DrawByBuffer(&tv);
         
-        SetDrawTarget(EntityLayer);
+        LayerController::SetActiveLayer(entity_layer);
         Clear(BLANK);
         for (auto* enemy : enemies)
-        enemy->Draw(&tv);
+            if (enemy->AmIAlive())
+                enemy->Draw(&tv);
 
         for (auto* player : players)
-        player->Draw(&tv);
+            if (player->AmIAlive())
+                player->Draw(&tv);
 
 
-        SetDrawTarget(UILayer);
+        LayerController::SetActiveLayer(ui_layer);
         Clear(BLANK);
 
         HitBoxHandler::Draw(&tv);

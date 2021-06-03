@@ -9,12 +9,15 @@
 
 // These correspond to a tile in the sheet
 enum TileBitMap {
-    TL=0, TM=4, TR=5,
-    ML=10, MM=9, MR=15,
+    TL=0,  TM=4,  TR=5,
+    ML=10, MM=9,  MR=15,
     BL=40, BM=41, BR=45,
+    AL=50, AR=53, HT=60,
+    HM=61
 };
 
 std::vector<int> AlternateMiddles = { 6, 7, 8, 9, 16, 17, 18, 19, 26, 27, 28, 29 };
+std::vector<int> AlternateTMs = { 1, 2, 3, 1, 2, 3, 4 };
 
 class BITMAP 
 {
@@ -38,7 +41,7 @@ public:
     Tile(tileBool e) : state(e) {}
     ~Tile(){}
     tileBool state;
-    int frame = 2;
+    int frame = 0;
 };
 
 class TileMap
@@ -54,6 +57,8 @@ private:
         for (int i = 0; i < m_TileVector.size(); i++)
         {
             srand(time(0) + i);
+
+            m_TileVector[i].frame = AlternateTMs[rand() % AlternateTMs.size()];
 
             olc::vi2d xyOfI = index2xy(i);
 
@@ -148,7 +153,7 @@ private:
                 bm.W  && bm.M && bm.E  &&
                 !bm.SW && !bm.S && !bm.SE)
             {
-                m_TileVector[i].frame = TM;
+                m_TileVector[i].frame = m_TileVector[i].frame = AlternateTMs[rand() % AlternateTMs.size()];
             }
             else
             if (bm.NW && bm.N && bm.NE &&
@@ -173,8 +178,8 @@ private:
             }
             else
             if (!bm.NW && !bm.N && !bm.NE &&
-                bm.W  && bm.M && bm.E  &&
-                bm.SW && bm.S && bm.SE)
+                 bm.W  &&  bm.M &&  bm.E  &&
+                 bm.SW &&  bm.S &&  bm.SE)
             {
                 m_TileVector[i].frame = BM;
             }
@@ -204,14 +209,14 @@ private:
                 bm.W  &&  bm.M &&  bm.E  &&
                 bm.SW && !bm.S && !bm.SE)
             {
-                m_TileVector[i].frame = TM;
+                m_TileVector[i].frame = m_TileVector[i].frame = AlternateTMs[rand() % AlternateTMs.size()];
             }
             else
             if  (bm.NW &&  bm.N && bm.NE &&
                  bm.W  &&  bm.M && bm.E  &&
                 !bm.SW && !bm.S && bm.SE)
             {
-                m_TileVector[i].frame = TM;
+                m_TileVector[i].frame = m_TileVector[i].frame = AlternateTMs[rand() % AlternateTMs.size()];
             }
             else
             if (!bm.NW && !bm.N && bm.NE &&
@@ -267,70 +272,105 @@ private:
                  bm.W  &&  bm.M && !bm.E  &&
                  bm.SW &&  bm.S &&  bm.SE)
             {
-                m_TileVector[i].frame = 53;
+                m_TileVector[i].frame = AR;
             }
             else
             if (!bm.NW && !bm.N && !bm.NE &&
                 !bm.W  &&  bm.M &&  bm.E  &&
                  bm.SW &&  bm.S &&  bm.SE)
             {
-                m_TileVector[i].frame = 50;
+                m_TileVector[i].frame = AL;
             }
             else
             if (!bm.NW && !bm.N && bm.NE &&
                 !bm.W  &&  bm.M && bm.E  &&
                 !bm.SW &&  bm.S && bm.SE)
             {
-                m_TileVector[i].frame = 50;
+                m_TileVector[i].frame = AL;
             }
             else
             if (bm.NW && !bm.N && !bm.NE &&
                 bm.W  &&  bm.M && !bm.E  &&
                 bm.SW &&  bm.S && !bm.SE)
             {
-                m_TileVector[i].frame = 53;
+                m_TileVector[i].frame = AR;
             }
             else
             if (!bm.NW && !bm.N && !bm.NE &&
                 !bm.W  &&  bm.M &&  bm.E  &&
                 !bm.SW &&  bm.S &&  bm.SE)
             {
-                m_TileVector[i].frame = 50;
+                m_TileVector[i].frame = AL;
             }
             else
             if (!bm.NW && !bm.N && !bm.NE &&
                  bm.W  &&  bm.M && !bm.E  &&
                  bm.SW &&  bm.S && !bm.SE)
             {
-                m_TileVector[i].frame = 53;
+                m_TileVector[i].frame = AR;
+            }
+            else
+            if ( bm.NW &&  bm.N && !bm.NE &&
+                 bm.W  &&  bm.M && !bm.E  &&
+                !bm.SW && !bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = m_TileVector[i].frame = AlternateTMs[rand() % AlternateTMs.size()];
+            }
+            else
+            if (!bm.NW &&  bm.N &&  bm.NE &&
+                !bm.W  &&  bm.M &&  bm.E  &&
+                !bm.SW && !bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = m_TileVector[i].frame = AlternateTMs[rand() % AlternateTMs.size()];
             }
             else
             if (!bm.NW && !bm.N && bm.NE &&
                 !bm.W  &&  bm.M && bm.E  &&
                  bm.SW &&  bm.S && bm.SE)
             {
-                m_TileVector[i].frame = 50;
+                m_TileVector[i].frame = AL;
             }
             else
             if (bm.NW && !bm.N && !bm.NE &&
                 bm.W  &&  bm.M && !bm.E  &&
                 bm.SW &&  bm.S &&  bm.SE)
             {
-                m_TileVector[i].frame = 53;
+                m_TileVector[i].frame = AR;
+            }
+            else
+            if (bm.NW &&  bm.N &&  bm.NE &&
+                bm.W  &&  bm.M && !bm.E  &&
+                bm.SW && !bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = m_TileVector[i].frame = AlternateTMs[rand() % AlternateTMs.size()];
+            }
+            else
+            if ( bm.NW &&  bm.N && bm.NE &&
+                !bm.W  &&  bm.M && bm.E  &&
+                !bm.SW && !bm.S && bm.SE  )
+            {
+                m_TileVector[i].frame = m_TileVector[i].frame = AlternateTMs[rand() % AlternateTMs.size()];
             }
             else
             if (!bm.NW && !bm.N && !bm.NE &&
                  bm.W  &&  bm.M &&  bm.E  &&
                 !bm.SW &&  bm.S &&  bm.SE )
             {
-                m_TileVector[i].frame = TM;
+                m_TileVector[i].frame = AL;
+            }
+            else
+            if (!bm.NW && !bm.N && !bm.NE &&
+                 bm.W  &&  bm.M &&  bm.E  &&
+                 bm.SW &&  bm.S && !bm.SE )
+            {
+                m_TileVector[i].frame = AR;
             }
             else
             if (!bm.NW && bm.N && !bm.NE &&
                  bm.W  && bm.M && !bm.E  &&
                  bm.SW && bm.S && !bm.SE )
             {
-                m_TileVector[i].frame = 53;
+                m_TileVector[i].frame = AR;
             }
             else
             if (!bm.NW && bm.N && !bm.NE &&
@@ -379,91 +419,231 @@ private:
                 bm.W  &&  bm.M &&  bm.E  &&
                 bm.SW &&  bm.S && !bm.SE)
             {
-                m_TileVector[i].frame = 53;
+                m_TileVector[i].frame = AR;
             }
             else
             if (!bm.NW && !bm.N && bm.NE &&
                  bm.W  &&  bm.M && bm.E  &&
                 !bm.SW &&  bm.S && bm.SE)
             {
-                m_TileVector[i].frame = 50;
+                m_TileVector[i].frame = AL;
             }
             else
             if (!bm.NW && bm.N && !bm.NE &&
                  bm.W  && bm.M &&  bm.E  &&
                 !bm.SW && bm.S &&  bm.SE)
             {
-                m_TileVector[i].frame = 50;
+                m_TileVector[i].frame = AL;
             }
             else
             if (!bm.NW && !bm.N &&  bm.NE &&
                  bm.W  &&  bm.M &&  bm.E  &&
                  bm.SW &&  bm.S && !bm.SE  )
             {
-                m_TileVector[i].frame = 53;
+                m_TileVector[i].frame = AR;
             }
             else
             if (!bm.NW && bm.N && !bm.NE &&
                 !bm.W  && bm.M &&  bm.E  &&
                  bm.SW && bm.S &&  bm.SE)
             {
-                m_TileVector[i].frame = 50;
+                m_TileVector[i].frame = AL;
             }
             else
             if (!bm.NW && bm.N && !bm.NE &&
                  bm.W  && bm.M && !bm.E  &&
                  bm.SW && bm.S &&  bm.SE)
             {
-                m_TileVector[i].frame = 53;
+                m_TileVector[i].frame = AR;
             }
             else
             if ( bm.NW && bm.N &&  bm.NE &&
                 !bm.W  && bm.M &&  bm.E  &&
                 !bm.SW && bm.S && !bm.SE)
             {
-                m_TileVector[i].frame = 61;
+                m_TileVector[i].frame = HM;
             }
             else
             if ( bm.NW && !bm.N && !bm.NE &&
                  bm.W  &&  bm.M &&  bm.E  &&
                 !bm.SW &&  bm.S &&  bm.SE)
             {
-                m_TileVector[i].frame = 60;
+                m_TileVector[i].frame = AL;
             }
             else
-            if (!bm.NW && !bm.N && !bm.NE &&
+            if (!bm.NW && !bm.N &&  bm.NE &&
                  bm.W  &&  bm.M &&  bm.E  &&
-                !bm.SW &&  bm.S &&  bm.SE)
+                 bm.SW &&  bm.S && !bm.SE)
             {
-                m_TileVector[i].frame = 60;
+                m_TileVector[i].frame = AR;
+            }
+            else
+            if (!bm.NW && bm.N && !bm.NE &&
+                 bm.W  && bm.M &&  bm.E  &&
+                 bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = AR;
             }
             else
             if (!bm.NW && !bm.N && !bm.NE &&
                 !bm.W  &&  bm.M && !bm.E  &&
                  bm.SW &&  bm.S && !bm.SE)
             {
-                m_TileVector[i].frame = 60;
+                m_TileVector[i].frame = HT;
             }
             else
             if (!bm.NW && !bm.N && !bm.NE &&
                 !bm.W  &&  bm.M && !bm.E  &&
                 !bm.SW &&  bm.S && bm.SE)
             {
-                m_TileVector[i].frame = 60;
+                m_TileVector[i].frame = HT;
+            }
+            else
+            if (!bm.NW && !bm.N && !bm.NE &&
+                !bm.W  &&  bm.M && !bm.E  &&
+                !bm.SW &&  bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HT;
+            }
+            else
+            if (!bm.NW && !bm.N && !bm.NE &&
+                !bm.W  &&  bm.M && !bm.E  &&
+                 bm.SW &&  bm.S && bm.SE)
+            {
+                m_TileVector[i].frame = HT;
             }
             else
             if (!bm.NW && bm.N && !bm.NE &&
                  bm.W  && bm.M && !bm.E  &&
                  bm.SW && bm.S &&  bm.SE)
             {
-                m_TileVector[i].frame = 53;
+                m_TileVector[i].frame = AR;
             }
             else
             if ( bm.NW && bm.N && !bm.NE &&
                  bm.W  && bm.M &&  bm.E  &&
                 !bm.SW && bm.S &&  bm.SE)
             {
-                m_TileVector[i].frame = 50;
+                m_TileVector[i].frame = AL;
+            }
+            else
+            if (!bm.NW && bm.N &&  bm.NE &&
+                 bm.W  && bm.M &&  bm.E  &&
+                 bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = AR;
+            }
+            else
+            if (!bm.NW && bm.N &&  bm.NE &&
+                 bm.W  && bm.M &&  bm.E  &&
+                !bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HM;
+            }
+            else
+            if ( bm.NW && bm.N && !bm.NE &&
+                 bm.W  && bm.M &&  bm.E  &&
+                !bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HM;
+            }
+            else
+            if (!bm.NW && bm.N &&  bm.NE &&
+                 bm.W  && bm.M &&  bm.E  &&
+                 bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = AR;
+            }
+            else
+            if (!bm.NW && bm.N && !bm.NE &&
+                 bm.W  && bm.M &&  bm.E  &&
+                !bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HM;
+            }
+            else
+            if (!bm.NW && bm.N &&  bm.NE &&
+                !bm.W  && bm.M &&  bm.E  &&
+                !bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HM;
+            }
+            else
+            if (!bm.NW && bm.N && !bm.NE &&
+                !bm.W  && bm.M &&  bm.E  &&
+                !bm.SW && bm.S &&  bm.SE)
+            {
+                m_TileVector[i].frame = HM;
+            }
+            else
+            if (!bm.NW && bm.N && !bm.NE &&
+                 bm.W  && bm.M && !bm.E  &&
+                 bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HM;
+            }
+            else
+            if ( bm.NW && bm.N && !bm.NE &&
+                 bm.W  && bm.M && !bm.E  &&
+                !bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HM;
+            }
+            else
+            if (!bm.NW && bm.N && !bm.NE &&
+                !bm.W  && bm.M &&  bm.E  &&
+                !bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HM;
+            }
+            else
+            if (!bm.NW && bm.N && !bm.NE &&
+                 bm.W  && bm.M && !bm.E  &&
+                !bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HM;
+            }
+            else
+            if (!bm.NW && bm.N &&  bm.NE &&
+                 bm.W  && bm.M && !bm.E  &&
+                 bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = AR;
+            }
+            else
+            if ( bm.NW && bm.N && !bm.NE &&
+                !bm.W  && bm.M &&  bm.E  &&
+                !bm.SW && bm.S &&  bm.SE)
+            {
+                m_TileVector[i].frame = AL;
+            }
+            else
+            if ( bm.NW && !bm.N && !bm.NE &&
+                 bm.W  &&  bm.M &&  bm.E  &&
+                !bm.SW &&  bm.S &&  bm.SE)
+            {
+                m_TileVector[i].frame = AL;
+            }
+            else
+            if (!bm.NW && !bm.N &&  bm.NE &&
+                 bm.W  &&  bm.M &&  bm.E  &&
+                 bm.SW &&  bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = AR;
+            }
+            else
+            if (!bm.NW && bm.N &&  bm.NE &&
+                !bm.W  && bm.M &&  bm.E  &&
+                 bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HM;
+            }
+            else
+            if ( bm.NW && bm.N && !bm.NE &&
+                 bm.W  && bm.M && !bm.E  &&
+                !bm.SW && bm.S &&  bm.SE)
+            {
+                m_TileVector[i].frame = HM;
             }
             else
             if (bm.NW && !bm.N && bm.NE &&
@@ -473,20 +653,48 @@ private:
                 m_TileVector[i].frame = BM;
             }
             else
+            if ( bm.NW && !bm.N && !bm.NE &&
+                 bm.W  &&  bm.M &&  bm.E  &&
+                !bm.SW &&  bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HT;
+            }
+            else
+            if (!bm.NW && !bm.N &&  bm.NE &&
+                 bm.W  &&  bm.M &&  bm.E  &&
+                !bm.SW &&  bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HT;
+            }
+            else
             if (!bm.W  &&  bm.M && !bm.E &&
                 !bm.SW && !bm.S && !bm.SE )
             {
-                m_TileVector[i].frame = TM;
+                m_TileVector[i].frame = m_TileVector[i].frame = AlternateTMs[rand() % AlternateTMs.size()];
             }
             else
             if (!bm.W && bm.M && !bm.E)
             {
-                m_TileVector[i].frame = 61;
+                m_TileVector[i].frame = HM;
             }
             else
             if (!bm.M)
             {
                 m_TileVector[i].frame = AlternateMiddles[rand() % AlternateMiddles.size()];
+            }
+
+            if ( bm.NW && bm.N && bm.NE &&
+                 bm.W  && bm.M && bm.E  &&
+                !bm.SW && bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HT;
+            }
+            else
+            if (!bm.NW && !bm.N && !bm.NE &&
+                 bm.W  &&  bm.M &&  bm.E  &&
+                !bm.SW &&  bm.S && !bm.SE)
+            {
+                m_TileVector[i].frame = HT;
             }
         }
     }
@@ -587,7 +795,7 @@ public:
     bool boundsCheck(int index) {
         // probably off by 1, untested
         olc::vf2d location = index2xy(index);
-        return (location.x >= 0 && location.x <= this->m_Width && location.y >= 0 && location.y <= this->m_Height);
+        return boundsCheck(location.x, location.y);
     }
 
     int xy2index(int x, int y)

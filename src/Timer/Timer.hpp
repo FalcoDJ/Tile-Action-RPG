@@ -11,6 +11,21 @@ private:
     bool m_Running = false;
     bool m_WasIRunningLastFrame = false;
 
+    void OnBeforeUserUpdate(float &fElapsedTime) override
+    {
+        m_WasIRunningLastFrame = m_Running;
+        
+        if (m_Running)
+        {
+            m_TimeLeft -= fElapsedTime;
+            if (m_TimeLeft <= 0.0f)
+            {
+                m_Running = false;
+                m_TimeLeft = 0.0f;
+            }
+        }
+    }
+
 public:
     Timer() : olc::PGEX(true) {}
 
@@ -34,21 +49,6 @@ public:
     bool Running()
     {
         return m_Running;
-    }
-
-    void OnBeforeUserUpdate(float &fElapsedTime) override
-    {
-        m_WasIRunningLastFrame = m_Running;
-        
-        if (m_Running)
-        {
-            m_TimeLeft -= fElapsedTime;
-            if (m_TimeLeft <= 0.0f)
-            {
-                m_Running = false;
-                m_TimeLeft = 0.0f;
-            }
-        }
     }
 
     bool JustFinished()

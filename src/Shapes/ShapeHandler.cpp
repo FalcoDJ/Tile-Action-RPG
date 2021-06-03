@@ -9,8 +9,8 @@ ShapeHandler::ShapeHandler()
     assert(m_s_Instance == nullptr);
     m_s_Instance = this;
 
-    m_Circles.reserve(999);
-    m_Rectangles.reserve(9999999);
+    m_Circles.reserve(1000);
+    m_Rectangles.reserve(1000000);
 }
 
 ShapeHandler::~ShapeHandler()
@@ -102,9 +102,11 @@ void ShapeHandler::Update(float fElapsedTime)
 void ShapeHandler::ClearCircles()
 {
     m_s_Instance->m_Circles.clear();
+    m_s_Instance->m_Circles.reserve(1000);
 }
 
 void ShapeHandler::ClearRectangles()
 {
     m_s_Instance->m_Rectangles.clear();
+    m_s_Instance->m_Rectangles.reserve(1000000);
 }

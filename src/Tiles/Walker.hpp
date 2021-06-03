@@ -55,8 +55,6 @@ public:
 private:
     void change_direction()
     {
-        place_room(m_Position);
-
         steps_since_turn = 0;
         std::list<olc::vf2d> directions = DIRECTIONS;
         
@@ -73,6 +71,7 @@ private:
             directions.pop_front();
         }
 
+        place_room(m_Position);
     }
     bool step()
     {
@@ -96,7 +95,7 @@ private:
     
     void place_room(olc::vf2d position)
     {
-        olc::vf2d size = {float(rand() % 2 + (rand() % 2 + 4)), float(rand() % 2 + 4)};
+        olc::vi2d size = {rand() % 2 + (rand() % 2 + 4), rand() % 2 + 4};
         olc::vf2d top_left_corner = (m_Position - size/2).ceil();
         // step_history.push_back(top_left_corner);
         rooms.push_back(create_room(position, size));
@@ -107,18 +106,6 @@ private:
                 if (new_step > top_left_corner && new_step < m_Bottom_Right_Border)
                     step_history.push_back(new_step);
             }
-    }
-
-
-    room get_end_room()
-    {
-        room end_room = rooms.front();
-        rooms.pop_front();
-        olc::vf2d starting_position = step_history.front();
-        for (auto r : rooms)
-            if ((r.position - starting_position).mag() > (end_room.position - starting_position).mag())
-                end_room = r;
-        return end_room;
     }
 
 public:
@@ -150,14 +137,25 @@ public:
 
         for (int i = 0; i < steps; i++)
         {
-            if (rand() > 0.5 && steps_since_turn >= max_hall_length)
+            if (rand() > 0.5f && steps_since_turn >= max_hall_length)
                 change_direction();
 
             if (step())
-            step_history.push_back(m_Position);
+                step_history.push_back(m_Position);
             else
-            change_direction();
+                change_direction();
         }
+    }
+
+    room get_end_room()
+    {
+        room end_room = rooms.front();
+        rooms.pop_front();
+        olc::vf2d starting_position = step_history.front();
+        for (auto r : rooms)
+            if ((r.position - starting_position).mag() > (end_room.position - starting_position).mag())
+                end_room = r;
+        return end_room;
     }
 };
 
