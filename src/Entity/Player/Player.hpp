@@ -15,9 +15,20 @@ private:
     float m_ChargeDuration = 0.75f;
     StopWatch m_ButtonClock;
 
-    float m_DefaultSpeed = 1.0;
-    float m_RunSpeed = 1.5;
+    float m_DefaultSpeed = 1.0; // These values are
+    float m_RunSpeed = 1.2;     // speed multipliers
+
     float m_ChargeSpeed = 0.5;
+
+private:
+    std::string m_SwingAnimation = "Swing";
+
+private:
+    void SetupAnimations() override
+    {
+        // sword swing animation
+        m_AnimationController.AddAnimation(m_SwingAnimation, 0.3f, 6, m_SpriteSheetDecal, { 0.0f, 0.0f }, { 32.0f, 48.0f }, {8, 24}, {0,0}, false);
+    }
 
 public:
     Player()
@@ -28,11 +39,11 @@ public:
         m_InvincibilityDuration = 0.75f;
 
         m_Bounds->radius = .5;
-        m_Speed = 5;
+        m_Speed = 7.5f; // This value is multiplied by movement vector to get the final speed
 
-        Setup();
+        InternalSetup();
 
-        m_HurtBox->radius = .4;
+        m_HurtBox->radius = 0.4f;
     }
     ~Player(){}
 
@@ -50,7 +61,7 @@ public:
 
     void Attack() override
     {
-        HitBoxHandler::CreateHitBox(m_Bounds->pos + m_AttackNormal * 1.4, m_HitboxRadius, 10, HBType::damage, m_HurtBox->layer);
+        HitBoxHandler::CreateHitBox(m_Bounds->pos + m_AttackNormal * 1.25f, m_HitboxRadius, 10, HBType::damage, m_HurtBox->layer);
     }
 
     void handleInput(olc::PixelGameEngine* pge)
@@ -79,7 +90,10 @@ public:
 
                 // Set attack normal if not attacking
                 if (!m_AttackTimer.Running())
+                {
                     m_AttackNormal = movement_vector.norm();
+                    SetAnimationRotation(movement_vector.norm());
+                }
             }
 
             // Handle Attacking
@@ -102,8 +116,15 @@ public:
                 // Light Attack
                 if (m_ButtonClock.GetElapsedTime() <= m_ChargeDuration && m_ButtonClock.JustFinished())
                 {
-                    m_HitboxRadius = 1.75f;
+                    m_HitboxRadius = 1.3f;
                     m_AttackTimer.Start(m_DurationOfAttack);
+                    m_AnimationController.Play(m_SwingAnimation);
+                    m_AnimationController.Stop(m_SwingAnimation, true);
+                    
+                    if (m_AttackNormal == olc::vf2d::ZERO())
+                        m_AttackNormal = movement_vector;
+
+                    SetAnimationRotation(m_AttackNormal);
                 }
 
                 // Charge Attack

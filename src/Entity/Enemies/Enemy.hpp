@@ -19,6 +19,11 @@ private:
     Timer m_TimeSinceLastWander;
 
 private:
+    void SetupAnimations() override
+    {
+
+    }
+
     void wander()
     {
         m_eState = EnemyState::IDLE;
@@ -89,7 +94,7 @@ public:
         m_Bounds->radius = .2;
         m_Speed = 2.5;
 
-        Setup();
+        InternalSetup();
 
         m_HurtBox->radius = .4;
     }

@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "../olcPixelGameEngine.h"
 #include "../olcPGEX_TransformedView.h"
+#include "../olcPGEX_Animator2D.h"
 #include "../Shapes/ShapeHandler.hpp"
 #include "../Shapes/HitBox/HitBoxHandler.hpp"
 #include "../Timer/Timer.hpp"
@@ -22,7 +23,7 @@ protected:
         m_Bounds = ShapeHandler::CreateCircle();
     }
 
-    void Setup() // Each inherited class will call this in its' constructor
+    void InternalSetup() // Each inherited class will call this in its' constructor
     {
         assert(m_HurtBox == nullptr);
         m_HurtBox = HitBoxHandler::CreateHurtBox(m_Layer);
@@ -36,6 +37,10 @@ protected:
 
     std::string m_Layer;
     olc::Pixel col = olc::GREEN;
+    olc::Sprite* m_SpriteSheet = nullptr;
+    olc::Decal* m_SpriteSheetDecal = nullptr;
+    olcPGEX_Animator2D m_AnimationController;
+    float m_AnimationRotation = 0.00f;
 
     float m_Speed;
     olc::vf2d movement_vector;
@@ -69,7 +74,29 @@ protected:
         m_AmIAlive = false;
     }
 
+    void SetAnimationRotation(olc::vf2d vRot) 
+    {
+        m_AnimationRotation = atan2(vRot.y, vRot.x);
+    }
+
 public:
+    bool Setup(std::string path_to_sprite)
+    {
+        if (!file::doesExist(path_to_sprite))
+        {
+            return false;
+        }
+        else
+        {
+            m_SpriteSheet = new olc::Sprite(path_to_sprite);
+            m_SpriteSheetDecal = new olc::Decal(m_SpriteSheet);
+
+            SetupAnimations();
+
+            return true;
+        }
+    }
+
     bool AmIAlive() { return m_AmIAlive; }
 
     void Spawn(olc::vf2d starting_point)
@@ -129,13 +156,18 @@ public:
             Die();
         }
 
+        m_AnimationController.UpdateAnimations(fElapsedTime);
+
         AfterUpdate();
     }
 
     virtual void AfterUpdate() {}
 
+    virtual void SetupAnimations() = 0;
+
     virtual void Draw(olc::TileTransformedView* tv)
     {
+        m_AnimationController.DrawAnimationFrame(tv->WorldToScreen(m_Bounds->pos), m_AnimationRotation, tv->GetWorldScale() / tv->GetTileSize().x);
         tv->FillCircle(m_Bounds->pos, m_Bounds->radius, col);
     }
 };

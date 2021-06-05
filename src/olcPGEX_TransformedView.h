@@ -188,11 +188,15 @@ namespace olc
 	public:
 		void SetRangeX(const bool bRanged, const int32_t nMin = 0, const int32_t nMax = 0);
 		void SetRangeY(const bool bRanged, const int32_t nMin = 0, const int32_t nMax = 0);
+
+
 		olc::vi2d GetTopLeftTile() const;
 		olc::vi2d GetBottomRightTile() const;
 		olc::vi2d GetVisibleTiles() const;
 		olc::vi2d GetTileUnderScreenPos(const olc::vi2d& vPos) const;
+		olc::vf2d GetTileSize() const;
 		const olc::vi2d GetTileOffset() const;
+		
 		
 	private:
 		bool m_bRangedX = false;
@@ -201,6 +205,7 @@ namespace olc
 		bool m_bRangedY = false;
 		int32_t m_nMinRangeY = 0;
 		int32_t m_nMaxRangeY = 0;
+		olc::vf2d m_vTileSize = {1,1};
 	};
 }
 
@@ -612,6 +617,7 @@ namespace olc
 	TileTransformedView::TileTransformedView(const olc::vi2d& vViewArea, const olc::vi2d& vTileSize)		
 	{ 
 		Initialise(vViewArea, vTileSize);
+		m_vTileSize = vTileSize;
 	}
 
 	void TileTransformedView::SetRangeX(const bool bRanged, const int32_t nMin, const int32_t nMax)
@@ -626,6 +632,11 @@ namespace olc
 		m_bRangedY = bRanged;
 		m_nMinRangeY = nMin;
 		m_nMaxRangeY = nMax;
+	}
+
+	olc::vf2d TileTransformedView::GetTileSize() const
+	{
+		return m_vTileSize;
 	}
 
 	olc::vi2d TileTransformedView::GetTopLeftTile() const

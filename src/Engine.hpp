@@ -14,6 +14,7 @@
 #include "olcPGEX_LayerController.h"
 
 #include <vector>
+#include <assert.h>
 
 #include "Shapes/ShapeHandler.hpp"
 #include "Shapes/HitBox/HitBoxHandler.hpp"
@@ -74,6 +75,8 @@ private:
         {
             player->Spawn(walker.rooms.front().position);
             walker.rooms.pop_front();
+            
+            assert(player->Setup("assets/Entity/Player/SpriteSheet.png"));
         }
 
         hhhhh.Spawn(walker.get_end_room().position);
@@ -178,12 +181,15 @@ public:
     {
 
         // Handle Pan & Zoom
-		if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
-		if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
-		if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
-		if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
-		if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
-        if (GetKey(Key::P).bPressed) pan = !pan;
+		// if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
+		// if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
+		// if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
+		// if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(1.1f, GetMousePos());
+		// if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.9f, GetMousePos());
+        // if (GetKey(Key::P).bPressed) pan = !pan;
+        tv.SetWorldScale({18.0f, 18.0f});
+
+        std::cout << tv.GetWorldScale() << "\n";
 
         int number_of_dead_enemies = 0;
 
