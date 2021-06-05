@@ -176,6 +176,7 @@ public:
     }
 
     bool pan = false;
+    olc::vf2d CameraPos;
 
     bool OnUserUpdate(float fElapsedTime) override
     {
@@ -187,9 +188,7 @@ public:
 		// if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(1.1f, GetMousePos());
 		// if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.9f, GetMousePos());
         // if (GetKey(Key::P).bPressed) pan = !pan;
-        tv.SetWorldScale({18.0f, 18.0f});
-
-        std::cout << tv.GetWorldScale() << "\n";
+        tv.SetWorldScale({20.0f, 20.0f});
 
         int number_of_dead_enemies = 0;
 
@@ -224,9 +223,12 @@ public:
             player->Update(fElapsedTime);
         }
 
+        float cam_speed = 0.0125f;
+        CameraPos = CameraPos.lerp(players[0]->GetBounds().pos, 1 - pow(cam_speed,fElapsedTime));
+
         // These will need to updated when/if multiplayer is implemented
         if (!pan)
-            tv.SetWorldOffset(players[0]->GetBounds().pos - tv.ScaleToWorld(olc::vf2d(ScreenWidth()/2.0f, ScreenHeight()/2.0f)));
+            tv.SetWorldOffset(CameraPos - tv.ScaleToWorld(olc::vf2d(ScreenWidth()/2.0f, ScreenHeight()/2.0f)));
         
 		olc::vi2d vCurrentCell = players[0]->GetBounds().pos.floor()/24;
         // 
