@@ -155,6 +155,7 @@ public:
         for (auto r : rooms)
             if ((r.position - starting_position).mag() > (end_room.position - starting_position).mag())
                 end_room = r;
+                
         return end_room;
     }
 };

@@ -22,6 +22,7 @@ protected:
         assert(m_Bounds == nullptr);
         m_Bounds = ShapeHandler::CreateCircle();
     }
+    ~Entity() {}
 
     void InternalSetup() // Each inherited class will call this in its' constructor
     {

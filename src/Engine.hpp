@@ -43,10 +43,12 @@ public:
     int level_height = 50;
     olc::vi2d level_size;
 
-    HealthPickup hhhhh;
-
     std::vector<Enemy*> enemies;
     std::vector<Player*> players;
+
+    Circle ExitHatch;
+    bool CreatedExitHatch = false;
+    olc::Decal* ExitHatchDecal = nullptr;
 
     olc::vf2d tv_scale = {0,0};
     int walker_step_count = 100;
@@ -55,6 +57,8 @@ public:
 private:
     void CreateLevel()
     {
+        CreatedExitHatch = false;
+
         walker.walk(walker_step_count);
         ShapeHandler::ClearCircles();
         ShapeHandler::ClearRectangles();
@@ -79,8 +83,6 @@ private:
             assert(player->Setup("assets/Entity/Player/SpriteSheet.png"));
         }
 
-        hhhhh.Spawn(walker.get_end_room().position);
-
         enemies.clear();
 
         for (auto& room : walker.rooms)
@@ -92,9 +94,10 @@ private:
             }
         }
         
-        tv.SetWorldScale(tv_scale);
+        // tv.SetWorldScale(tv_scale);
         tv.SetRangeX(true, 0, level_size.x);
         tv.SetRangeY(true, 0, level_size.y);
+        tv.SetWorldScale({20.0f, 20.0f});
 
         tile_map.CreateBuffer(this, &tv);
 
@@ -131,8 +134,6 @@ public:
         enemies.clear();
     }
 
-    Decal* tempDecal = nullptr;
-
     int TilesLayer = 0;
     int EntityLayer = 0;
     int UILayer = 0;
@@ -150,7 +151,16 @@ public:
         tv = TileTransformedView({ScreenWidth(), ScreenHeight()}, {16,16});
         tv_scale = tv.GetWorldScale();
 
-        tempDecal = new Decal(new Sprite("assets/Tiles/Tiles.png"));
+        ExitHatch.radius = 0.5f;
+
+        olc::Sprite* tempSprite = new olc::Sprite(16,16);
+        olc::Sprite* tempSpriteSheet = new olc::Sprite("assets/Tiles/Tiles.png");
+
+        SetDrawTarget(tempSprite);
+        DrawSpriteFrame(this, {0,0}, tempSpriteSheet, {16,16}, 10, 38);
+        SetDrawTarget(nullptr);
+
+        ExitHatchDecal = new olc::Decal(tempSprite);
 
         tile_map.path_to_spritesheet = "assets/Tiles/Tiles.png";
         tile_map.defaultStateForTile = enabled;
@@ -180,15 +190,13 @@ public:
 
     bool OnUserUpdate(float fElapsedTime) override
     {
-
-        // Handle Pan & Zoom
+        // // Handle Pan & Zoom
 		// if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
 		// if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
 		// if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
-		// if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(1.1f, GetMousePos());
-		// if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.9f, GetMousePos());
+		// if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
+		// if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
         // if (GetKey(Key::P).bPressed) pan = !pan;
-        tv.SetWorldScale({20.0f, 20.0f});
 
         int number_of_dead_enemies = 0;
 
@@ -249,10 +257,24 @@ public:
 
         if (number_of_dead_enemies >= enemies.size()) 
         { 
-            if (walker.Setup(level_size/2,{0,0},level_size))
+            // if (walker.Setup(level_size/2,{0,0},level_size))
+            // {
+            //     CreateLevel();
+            // } 
+            // TODO : Make level change when player has enetered ExitHatch
+            if (!CreatedExitHatch)
             {
-                CreateLevel();
-            } 
+                CreatedExitHatch = true;
+                ExitHatch.pos = walker.get_end_room().position + olc::vf2d(tile_map.tileSize,tile_map.tileSize)/2;
+
+            }
+            if ((players[0]->GetBounds().pos - ExitHatch.pos).mag2() <= (players[0]->GetBounds().radius + ExitHatch.radius) * (players[0]->GetBounds().radius + ExitHatch.radius))
+            {
+                if (walker.Setup(level_size/2,{0,0},level_size))
+                {
+                    CreateLevel();
+                } 
+            }
         }
 
         // Drawing Stuff Starts Here
@@ -271,6 +293,12 @@ public:
             if (player->AmIAlive())
                 player->Draw(&tv);
 
+        if (CreatedExitHatch)
+        {
+            tv.FillCircle(ExitHatch.pos, ExitHatch.radius, olc::RED);
+            tv.DrawDecal(ExitHatch.pos - olc::vf2d(tile_map.tileSize,tile_map.tileSize)/2, ExitHatchDecal);
+        }
+
 
         LayerController::SetActiveLayer(ui_layer);
         Clear(BLANK);
@@ -281,6 +309,7 @@ public:
         FillRectDecal({8,4}, {players[0]->GetHealthPercentage() * 80, 8}, GREEN);
         DrawStringDecal({96,4}, "(" + std::to_string(vCurrentCell.x) + ", " + std::to_string(vCurrentCell.y) + ") FPS: " + std::to_string(GetFPS()), RED);
 
+        HitBoxHandler::AfterUpdate();
         return true;
     }
 };

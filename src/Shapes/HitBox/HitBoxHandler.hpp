@@ -34,6 +34,7 @@ class HitBoxHandler
         static void Clear();
 
         static void Update(float fElapsedTime);
+        static void AfterUpdate();
         static void Draw(olc::TransformedView* tv);
 };
 

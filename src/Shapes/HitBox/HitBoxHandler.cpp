@@ -124,6 +124,12 @@ void HitBoxHandler::Update(float fElapsedTime)
     }
 }
 
+void HitBoxHandler::AfterUpdate()
+{
+    auto& hitbox_vec = m_s_Instance->m_HitBoxes;
+    hitbox_vec.clear();
+}
+
 void HitBoxHandler::Draw(olc::TransformedView* tv)
 {
     olc::Pixel HurtBoxColor = olc::Pixel(255,255,0,127);
@@ -138,6 +144,6 @@ void HitBoxHandler::Draw(olc::TransformedView* tv)
     for (auto& hitbox : hitbox_vec)
         if (hitbox.layer != GetNullLayer())
             tv->DrawCircle(hitbox.pos, hitbox.radius, HitBoxColor);
-
-    hitbox_vec.clear();
 }
+
+

@@ -752,17 +752,12 @@ public:
         if (BufferSprite != nullptr)
         delete BufferSprite;
 
-        BufferSprite = new olc::Sprite(m_Width * tv->GetWorldScale().x,m_Height * tv->GetWorldScale().y);
+        BufferSprite = new olc::Sprite(m_Width * tv->GetTileSize().x,m_Height * tv->GetTileSize().y);
         pge->SetDrawTarget(BufferSprite);
         pge->Clear(olc::BLANK);
         
-        tv->SetWorldOffset({0,0});
-        
-        // DrawByTiles(tv);
         for (int i = 0; i < m_Width * m_Height; i++)
-            DrawSpriteFrame(pge, index2xy(i) * tv->GetWorldScale(), SpriteSheet, {16, 16}, 10, m_TileVector[i].frame);
-            // tv->FillRect(index2xy(i) * tileSize, olc::vf2d(tileSize,tileSize), bool(m_TileVector[i].state) ? olc::WHITE : olc::BLANK);
-                // pge->DrawPartialSprite(index2xy(i) * tv->GetWorldScale(), SpriteSheet, {0,0}, {16,16});
+            DrawSpriteFrame(pge, index2xy(i) * tv->GetTileSize(), SpriteSheet, tv->GetTileSize(), 10, m_TileVector[i].frame);
 
         pge->SetDrawTarget(nullptr);
 
