@@ -9,7 +9,12 @@
 #define OLC_PGEX_TRANSFORMEDVIEW
 #endif
 
+#ifndef OLC_PGEX_SOUND
+#define OLC_PGEX_SOUND
+#endif
+
 #include "olcPixelGameEngine.h"
+#include "olcPGEX_Sound.h"
 #include "olcPGEX_TransformedView.h"
 #include "olcPGEX_LayerController.h"
 
@@ -58,6 +63,9 @@ private:
     void CreateLevel()
     {
         CreatedExitHatch = false;
+
+        olc::SOUND::StopSample(music_01);
+        olc::SOUND::PlaySample(music_01);
 
         walker.walk(walker_step_count);
         ShapeHandler::ClearCircles();
@@ -142,11 +150,19 @@ public:
     std::string entity_layer = "2";
     std::string tiles_layer = "3";
 
+    int music_01 = 0;
+
     bool OnUserCreate() override
     {   
         LayerController::CreateLayer(ui_layer);
         LayerController::CreateLayer(entity_layer);
         LayerController::CreateLayer(tiles_layer);
+
+        olc::SOUND::InitialiseAudio(44100, 1, 8, 512);
+        if (file::doesExist("assets/music/Dungeon01.wav"))
+        {
+            music_01 = olc::SOUND::LoadAudioSample("assets/music/Dungeon01.wav");
+        }
 
         tv = TileTransformedView({ScreenWidth(), ScreenHeight()}, {16,16});
         tv_scale = tv.GetWorldScale();
@@ -295,7 +311,6 @@ public:
 
         if (CreatedExitHatch)
         {
-            tv.FillCircle(ExitHatch.pos, ExitHatch.radius, olc::RED);
             tv.DrawDecal(ExitHatch.pos - olc::vf2d(tile_map.tileSize,tile_map.tileSize)/2, ExitHatchDecal);
         }
 
@@ -310,6 +325,13 @@ public:
         DrawStringDecal({96,4}, "(" + std::to_string(vCurrentCell.x) + ", " + std::to_string(vCurrentCell.y) + ") FPS: " + std::to_string(GetFPS()), RED);
 
         HitBoxHandler::AfterUpdate();
+        return true;
+    }
+
+    bool OnUserDestroy() override
+    {
+        olc::SOUND::DestroyAudio();
+        
         return true;
     }
 };
