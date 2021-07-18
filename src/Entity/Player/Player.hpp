@@ -19,6 +19,7 @@ private:
     float m_RunSpeed = 1.2;     // speed multipliers
 
     float m_ChargeSpeed = 0.5;
+    olc::vf2d m_CurrentAttackNormal = { 0, 0 };
 
 private:
     std::string m_SwingAnimation = "Swing";
@@ -28,6 +29,11 @@ private:
     {
         // sword swing animation
         m_AnimationController.AddAnimation(m_SwingAnimation, 0.3f, 6, m_SpriteSheetDecal, { 0.0f, 0.0f }, { 32.0f, 48.0f }, {8, 24}, {0,0}, false);
+    }
+
+    void SetCurrentAttackNormal(olc::vf2d norm = { 0, 0 })
+    {
+        m_CurrentAttackNormal = norm;
     }
 
 public:
@@ -61,7 +67,7 @@ public:
 
     void Attack() override
     {
-        HitBoxHandler::CreateHitBox(m_Bounds->pos + m_AttackNormal * 1.25f, m_HitboxRadius, 10, HBType::damage, m_HurtBox->layer);
+        HitBoxHandler::CreateHitBox(m_Bounds->pos + m_CurrentAttackNormal * 1.25f, m_HitboxRadius, 10, HBType::damage, m_HurtBox->layer);
     }
 
     void handleInput(olc::PixelGameEngine* pge)
@@ -70,9 +76,9 @@ public:
         
         if (m_AmIAlive)
         {
-            // Reset Attack Normal
-            if (!m_AttackTimer.Running())
-                m_AttackNormal = olc::vf2d::ZERO();
+            // // Reset Attack Normal
+            // if (!m_AttackTimer.Running())
+            //     m_AttackNormal = olc::vf2d::ZERO();
 
             // Get Direction of movement
             int x_value = (int)pge->GetKey(Right).bHeld - (int)pge->GetKey(Left).bHeld;
@@ -124,6 +130,7 @@ public:
                     if (m_AttackNormal == olc::vf2d::ZERO())
                         m_AttackNormal = movement_vector;
 
+                    SetCurrentAttackNormal(m_AttackNormal);
                     SetAnimationRotation(m_AttackNormal);
                 }
 
@@ -131,7 +138,7 @@ public:
                 if (m_ButtonClock.GetElapsedTime() >= m_ChargeDuration && m_ButtonClock.JustFinished())
                 {
                     m_HitboxRadius = 2.5f;
-                    m_AttackNormal = olc::vf2d::ZERO();
+                    SetCurrentAttackNormal({ 0, 0 });
                     m_AttackTimer.Start(m_DurationOfAttack);
                 }
 
