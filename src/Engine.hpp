@@ -293,7 +293,7 @@ public:
             }
         }
 
-        // Drawing Stuff Starts Here
+        // // Drawing Stuff Starts Here
 
         LayerController::SetActiveLayer(tiles_layer);
         Clear(BLANK);
@@ -316,7 +316,10 @@ public:
 
 
         LayerController::SetActiveLayer(ui_layer);
-        Clear(BLANK);
+        Clear(BLACK);
+
+        SetPixelMode(Pixel::Mode::NORMAL);
+        FillCircle(tv.WorldToScreen(players[0]->GetBounds().pos), Canvas_Size.y/3, BLANK);
 
         HitBoxHandler::Draw(&tv);
 

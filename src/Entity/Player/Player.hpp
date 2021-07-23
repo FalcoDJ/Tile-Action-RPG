@@ -137,7 +137,7 @@ public:
                 // Charge Attack
                 if (m_ButtonClock.GetElapsedTime() >= m_ChargeDuration && m_ButtonClock.JustFinished())
                 {
-                    m_HitboxRadius = 2.5f;
+                    m_HitboxRadius = 2.0f;
                     SetCurrentAttackNormal({ 0, 0 });
                     m_AttackTimer.Start(m_DurationOfAttack);
                 }

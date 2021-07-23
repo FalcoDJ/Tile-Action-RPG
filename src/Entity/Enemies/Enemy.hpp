@@ -91,18 +91,18 @@ public:
         m_MaxHealth = 10;
 
         col = olc::RED;
-        m_Bounds->radius = .2;
-        m_Speed = 2.5;
+        m_Bounds->radius = 0.2f;
+        m_Speed = 2.5f;
 
         InternalSetup();
 
-        m_HurtBox->radius = .4;
+        m_HurtBox->radius = 0.25f;
     }
     ~Enemy(){}
 
     void Attack() override
     {
-        HitBoxHandler::CreateHitBox(m_Bounds->pos + movement_vector * 0.5, 0.5, 10, HBType::damage, m_HurtBox->layer);
+        HitBoxHandler::CreateHitBox(m_Bounds->pos + movement_vector * 0.2f, 0.35f, 10, HBType::damage, m_HurtBox->layer);
     }
 
     void GetHurt() override
